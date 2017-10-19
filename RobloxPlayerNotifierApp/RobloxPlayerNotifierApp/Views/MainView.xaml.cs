@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows;
@@ -30,7 +31,7 @@ namespace RobloxPlayerNotifierApp.Views
 
         private void MainView_OnLoaded(object sender, RoutedEventArgs e)
         {
-            _monitorService.Start();
+            _monitorService.Start(new List<string>() { "ComKeanOfficial", "MiltonSej", "MarvinSej" });
         }
     }
 }

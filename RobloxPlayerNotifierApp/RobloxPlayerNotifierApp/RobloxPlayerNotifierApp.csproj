@@ -65,6 +65,7 @@
     <Compile Include="Models\Enums.cs" />
     <Compile Include="Models\PlayerStatusModel.cs" />
     <Compile Include="Services\RobloxPlayerMonitorService.cs" />
+    <Compile Include="Services\RobloxPlayerStatusService.cs" />
     <Compile Include="Views\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
       <SubType>Code</SubType>

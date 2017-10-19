@@ -11,13 +11,16 @@ namespace RobloxPlayerNotifierApp.Services
     {
         public Action<PlayerStatusModel> PlayerStatusChanged;
 
-        public void Start()
+        private RobloxPlayerStatusService _statusService = new RobloxPlayerStatusService();
+
+
+        public void Start(IEnumerable<string> playerNamesToMonitor)
         {
             if (IsRunning)
                 return;
 
             IsRunning = true;
-            ActualMonitoring();
+            ActualMonitoring(playerNamesToMonitor);
         }
 
         public void Stop()
@@ -27,11 +30,18 @@ namespace RobloxPlayerNotifierApp.Services
 
 
 
-        private async Task ActualMonitoring()
+        private async Task ActualMonitoring(IEnumerable<string> playerNamesToMonitor)
         {
             while (IsRunning)
             {
-                Console.WriteLine("Working....monitoring!!");
+                foreach (var playerName in playerNamesToMonitor)
+                {
+                    var playerStatus = await _statusService.GetPlayerStatus(playerName);
+
+                    if (PlayerStatusChanged != null)
+                        PlayerStatusChanged(playerStatus);
+                }
+
                 await Task.Delay(5000);
             }
         }
