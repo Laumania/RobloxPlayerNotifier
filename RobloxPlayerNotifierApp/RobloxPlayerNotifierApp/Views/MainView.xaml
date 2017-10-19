@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RobloxPlayerNotifierApp"
         mc:Ignorable="d" Background="#FFE3E3E3"
-        Title="Roblox Player Notifier" Height="350" Width="525">
+        Title="Roblox Player Notifier" Height="350" Width="525"
+        Loaded="MainView_OnLoaded">
     <Grid>
         <Label>Keeping an eye on your Roblox player...</Label>
     </Grid>
