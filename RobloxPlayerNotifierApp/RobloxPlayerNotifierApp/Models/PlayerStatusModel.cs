@@ -8,12 +8,14 @@ namespace RobloxPlayerNotifierApp.Models
 {
     public class PlayerStatusModel
     {
-        public PlayerStatusModel(string name, PlayerStatus status)
+        public PlayerStatusModel(string name, PlayerStatus status, string playerProfileUrl)
         {
-            Name    = name;
-            Status  = status;
+            Name                = name;
+            Status              = status;
+            PlayerProfileUrl    = playerProfileUrl;
         }
-        public string Name          { get; }
-        public PlayerStatus Status  { get; }
+        public string Name              { get; }
+        public PlayerStatus Status      { get; }
+        public string PlayerProfileUrl  { get; }
     }
 }

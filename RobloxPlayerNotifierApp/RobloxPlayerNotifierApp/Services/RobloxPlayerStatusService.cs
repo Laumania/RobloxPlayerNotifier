@@ -30,7 +30,7 @@ namespace RobloxPlayerNotifierApp.Services
 
                 _logger.Debug($"PlayerStatus for '{robloxPlayerName}' is '{status}'");
 
-                return new PlayerStatusModel(robloxPlayerName, status);
+                return new PlayerStatusModel(robloxPlayerName, status, requestUrl);
             }
         }
     }

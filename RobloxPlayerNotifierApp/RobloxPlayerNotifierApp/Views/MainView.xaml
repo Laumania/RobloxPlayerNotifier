@@ -8,7 +8,43 @@
         Title="Roblox Player Notifier" Height="350" Width="525"
         Loaded="MainView_OnLoaded">
     <Grid>
-        <Label>Keeping an eye on your Roblox player...</Label>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        
+        <Label Grid.Row="0">Keeping an eye on your Roblox player...</Label>
+        
+        <ListView Grid.Row="1"
+                  x:Name="PlayerStatusListView"
+                  ItemsSource="{Binding PlayerStatusList}"
+                  Margin="20"
+                  HorizontalContentAlignment="Stretch"
+                  Background="White">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid HorizontalAlignment="Stretch" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="60*" />
+                            <ColumnDefinition Width="20*" />
+                            <ColumnDefinition Width="20*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" Content="{Binding Name}"></Label>
+                        <Label Grid.Column="1" Content="{Binding Status}"></Label>
+                        <Button Grid.Column="2" 
+                                Content="Join" Command="{Binding ElementName=PlayerStatusListView, Path=DataContext.ViewProfileCommand}"
+                                CommandParameter="{Binding .}"
+                                
+                                Visibility="{Binding ProfileButtonVisibility}" 
+                                Background="#FF3FC679"
+                                Foreground="White" 
+                                FontWeight="Bold" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            
+        </ListView>
         
         
     </Grid>

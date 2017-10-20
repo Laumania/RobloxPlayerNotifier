@@ -27,6 +27,14 @@ namespace RobloxPlayerNotifierApp.Views
             this.DataContext = _viewModel = new MainViewModel();
 
             _viewModel.PlayerStatusChanged += PlayerStatusChanged;
+
+            PreviouseWindowState = WindowState;
+            LayoutUpdated += Window_LayoutUpdated;
+        }
+
+        private void MainView_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            _viewModel.Start();
         }
 
         private void PlayerStatusChanged(PlayerStatusModel playerStatusModel)
@@ -34,15 +42,29 @@ namespace RobloxPlayerNotifierApp.Views
             _logger.Info($"Status changed for '{playerStatusModel.Name}', to '{playerStatusModel.Status}'");
 
             if (playerStatusModel.Status == PlayerStatus.Playing)
+            {
                 _alertSoundPlayer.Play();
+                this.Activate(true);
+            }
         }
 
 
 
-
-        private void MainView_OnLoaded(object sender, RoutedEventArgs e)
+        private void Window_LayoutUpdated(object sender, EventArgs e)
         {
-            _viewModel.Start();
+            PreviouseWindowState = WindowState;
         }
+
+        public bool Activate(bool restoreIfMinimized)
+        {
+            if (restoreIfMinimized && WindowState == WindowState.Minimized)
+            {
+                WindowState = PreviouseWindowState == WindowState.Normal
+                    ? WindowState.Normal : WindowState.Maximized;
+            }
+            return Activate();
+        }
+
+        private WindowState PreviouseWindowState { get; set; }
     }
 }
