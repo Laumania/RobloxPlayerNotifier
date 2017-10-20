@@ -16,9 +16,9 @@ namespace RobloxPlayerNotifierApp.Views
     /// </summary>
     public partial class MainView : Window
     {
-        private readonly Logger         _logger = LogManager.GetCurrentClassLogger();
-        private readonly SoundPlayer    _alertSoundPlayer = new SoundPlayer("Sounds\\Air Horn-SoundBible.com-964603082.wav");
-        private MainViewModel           _viewModel;
+        private readonly Logger         _logger             = LogManager.GetCurrentClassLogger();
+        private readonly SoundPlayer    _alertSoundPlayer   = new SoundPlayer("Sounds\\EasyPeasyLemonSqueezy.wav");
+        private readonly MainViewModel  _viewModel;
 
         public MainView()
         {
@@ -27,7 +27,6 @@ namespace RobloxPlayerNotifierApp.Views
             this.DataContext = _viewModel = new MainViewModel();
 
             _viewModel.PlayerStatusChanged += PlayerStatusChanged;
-
         }
 
         private void PlayerStatusChanged(PlayerStatusModel playerStatusModel)

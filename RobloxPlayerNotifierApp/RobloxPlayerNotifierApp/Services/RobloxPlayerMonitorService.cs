@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +12,9 @@ namespace RobloxPlayerNotifierApp.Services
     {
         public Action<PlayerStatusModel> PlayerStatusChanged;
 
-        private RobloxPlayerStatusService _statusService = new RobloxPlayerStatusService();
-
+        private readonly TimeSpan                               _statusCheckInterval    = TimeSpan.FromMilliseconds(5000);
+        private readonly RobloxPlayerStatusService              _statusService          = new RobloxPlayerStatusService();
+        private readonly IDictionary<string, PlayerStatusModel> _previousPlayerStatuses = new Dictionary<string, PlayerStatusModel>();
 
         public void Start(IEnumerable<string> playerNamesToMonitor)
         {
@@ -20,7 +22,7 @@ namespace RobloxPlayerNotifierApp.Services
                 return;
 
             IsRunning = true;
-            ActualMonitoring(playerNamesToMonitor);
+            RunActualMonitoringTask(playerNamesToMonitor);
         }
 
         public void Stop()
@@ -30,25 +32,38 @@ namespace RobloxPlayerNotifierApp.Services
 
 
 
-        private async Task ActualMonitoring(IEnumerable<string> playerNamesToMonitor)
+        private async Task RunActualMonitoringTask(IEnumerable<string> playerNamesToMonitor)
         {
             while (IsRunning)
             {
                 foreach (var playerName in playerNamesToMonitor)
                 {
-                    var playerStatus = await _statusService.GetPlayerStatus(playerName);
+                    var currentPlayerStatus = await _statusService.GetPlayerStatus(playerName);
 
-                    if (PlayerStatusChanged != null)
-                        PlayerStatusChanged(playerStatus);
+                    PlayerStatusModel previousPlayerStatus;
+
+                    if(_previousPlayerStatuses.TryGetValue(playerName, out previousPlayerStatus))
+                    {
+                        if(previousPlayerStatus.Status != PlayerStatus.Playing && currentPlayerStatus.Status == PlayerStatus.Playing)
+                            OnPlayerStatusChanged(currentPlayerStatus);
+                    }
+                    else if (currentPlayerStatus.Status == PlayerStatus.Playing)
+                    {
+                        OnPlayerStatusChanged(currentPlayerStatus);
+                    }
+
+                    _previousPlayerStatuses[playerName] = currentPlayerStatus;
                 }
 
-                await Task.Delay(5000);
+                await Task.Delay(_statusCheckInterval);
             }
         }
 
-
-
-
+        private void OnPlayerStatusChanged(PlayerStatusModel playerStatus)
+        {
+            if (PlayerStatusChanged != null)
+                PlayerStatusChanged(playerStatus);
+        }
 
 
         public bool IsRunning { get; private set; }
