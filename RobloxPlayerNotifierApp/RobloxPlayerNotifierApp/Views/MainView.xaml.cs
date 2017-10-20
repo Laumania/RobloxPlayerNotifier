@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Media;
 using System.Threading;
 using System.Windows;
+using NLog;
 using RobloxPlayerNotifierApp.Models;
 using RobloxPlayerNotifierApp.Services;
 using RobloxPlayerNotifierApp.ViewModels;
@@ -15,6 +16,7 @@ namespace RobloxPlayerNotifierApp.Views
     /// </summary>
     public partial class MainView : Window
     {
+        private readonly Logger         _logger = LogManager.GetCurrentClassLogger();
         private readonly SoundPlayer    _alertSoundPlayer = new SoundPlayer("Sounds\\Air Horn-SoundBible.com-964603082.wav");
         private MainViewModel           _viewModel;
 
@@ -30,7 +32,7 @@ namespace RobloxPlayerNotifierApp.Views
 
         private void PlayerStatusChanged(PlayerStatusModel playerStatusModel)
         {
-            Console.WriteLine($"Status changed for '{playerStatusModel.Name}', to '{playerStatusModel.Status}' - let's send a notification?");
+            _logger.Info($"Status changed for '{playerStatusModel.Name}', to '{playerStatusModel.Status}'");
 
             if (playerStatusModel.Status == PlayerStatus.Playing)
                 _alertSoundPlayer.Play();
