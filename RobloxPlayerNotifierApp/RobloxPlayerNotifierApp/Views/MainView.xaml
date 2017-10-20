@@ -14,12 +14,12 @@
         </Grid.RowDefinitions>
         
         
-        <Label Grid.Row="0">Keeping an eye on your Roblox player...</Label>
+        <Label Grid.Row="0">Keeping an eye on your favorite Roblox players and notifies when one of them is playing.</Label>
         
         <ListView Grid.Row="1"
                   x:Name="PlayerStatusListView"
                   ItemsSource="{Binding PlayerStatusList}"
-                  Margin="20"
+                  Margin="5"
                   HorizontalContentAlignment="Stretch"
                   Background="White">
             <ListView.ItemTemplate>
