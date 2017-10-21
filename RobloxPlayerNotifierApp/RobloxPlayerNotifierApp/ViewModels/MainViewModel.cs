@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Configuration;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -35,11 +36,12 @@ namespace RobloxPlayerNotifierApp.ViewModels
 
         private void InitializePlayerStatusList()
         {
-            PlayerStatusList.Add(new PlayerStatusViewModel("ComKeanOfficial"));
-            PlayerStatusList.Add(new PlayerStatusViewModel("Emil_trier"));
-            PlayerStatusList.Add(new PlayerStatusViewModel("Mikkel_trier"));
-            PlayerStatusList.Add(new PlayerStatusViewModel("MiltonSej"));
-            PlayerStatusList.Add(new PlayerStatusViewModel("MarvinSej"));
+            var playerNamesToMonitor = ConfigurationManager.AppSettings["PlayerNamesToMonitor"].Split(';');
+
+            foreach (var playerName in playerNamesToMonitor)
+            {
+                PlayerStatusList.Add(new PlayerStatusViewModel(playerName));
+            }
         }
 
         public void Start()

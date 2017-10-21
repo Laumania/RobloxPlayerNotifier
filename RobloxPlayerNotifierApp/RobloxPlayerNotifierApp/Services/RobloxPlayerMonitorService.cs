@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,9 +13,16 @@ namespace RobloxPlayerNotifierApp.Services
     {
         public Action<PlayerStatusModel> PlayerStatusChanged;
 
-        private readonly TimeSpan                               _statusCheckInterval    = TimeSpan.FromMilliseconds(5000);
+        private readonly TimeSpan                               _statusCheckInterval;
         private readonly RobloxPlayerStatusService              _statusService          = new RobloxPlayerStatusService();
         private readonly IDictionary<string, PlayerStatusModel> _previousPlayerStatuses = new Dictionary<string, PlayerStatusModel>();
+
+        public RobloxPlayerMonitorService()
+        {
+            var intervalAsString = ConfigurationManager.AppSettings["PlayerStatusCheckIntervalInSeconds"];
+            var intervalAsDouble = double.Parse(intervalAsString);
+            _statusCheckInterval = TimeSpan.FromSeconds(intervalAsDouble);
+        }
 
         public void Start(IEnumerable<string> playerNamesToMonitor)
         {
