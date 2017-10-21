@@ -8,7 +8,7 @@ To be honest as a developer, I actually wanted to create this small tool myself,
 
 ## FAQ
 - Why didn't you just build this in JavaScript, then it would have worked on Mac and Linux too?
-  - Sorry, you lost me at JavaScript
+  - Because it's JavaScript - https://www.destroyallsoftware.com/talks/wat
 
 
 ## History
