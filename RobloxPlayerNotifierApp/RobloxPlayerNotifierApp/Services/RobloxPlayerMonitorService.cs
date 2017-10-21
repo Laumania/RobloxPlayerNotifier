@@ -48,6 +48,9 @@ namespace RobloxPlayerNotifierApp.Services
                 {
                     var currentPlayerStatus = await _statusService.GetPlayerStatus(playerName);
 
+                    if(currentPlayerStatus == null)
+                        continue;
+
                     PlayerStatusModel previousPlayerStatus;
 
                     if(_previousPlayerStatuses.TryGetValue(playerName, out previousPlayerStatus))

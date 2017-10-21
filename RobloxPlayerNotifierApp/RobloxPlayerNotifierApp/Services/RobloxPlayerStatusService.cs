@@ -17,20 +17,26 @@ namespace RobloxPlayerNotifierApp.Services
         {
             using (var client = new HttpClient())
             {
-                var requestUrl = $"http://www.roblox.com/User.aspx?UserName={robloxPlayerName}";
-
+                var requestUrl  = $"http://www.roblox.com/User.aspx?UserName={robloxPlayerName}";
                 _logger.Trace($"Requesting '{requestUrl}'");
-                var response = await client.GetStringAsync(requestUrl);
+                var response    = await client.GetAsync(requestUrl);
 
-                var status = PlayerStatus.Offline;
-                if (response.Contains("icon-game"))
-                    status = PlayerStatus.Playing;
-                else if(response.Contains("icon-online"))
-                    status = PlayerStatus.Online;
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
 
-                _logger.Debug($"PlayerStatus for '{robloxPlayerName}' is '{status}'");
+                    var status = PlayerStatus.Offline;
+                    if (responseContent.Contains("icon-game"))
+                        status = PlayerStatus.Playing;
+                    else if (responseContent.Contains("icon-online"))
+                        status = PlayerStatus.Online;
 
-                return new PlayerStatusModel(robloxPlayerName, status, requestUrl);
+                    _logger.Debug($"PlayerStatus for '{robloxPlayerName}' is '{status}'");
+
+                    return new PlayerStatusModel(robloxPlayerName, status, requestUrl);
+                }
+                _logger.Debug($"Failed status check for '{robloxPlayerName}': {response.ReasonPhrase}");
+                return null;
             }
         }
     }
