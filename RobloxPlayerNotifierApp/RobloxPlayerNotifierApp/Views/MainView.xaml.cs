@@ -39,10 +39,11 @@ namespace RobloxPlayerNotifierApp.Views
 
         private void PlayerStatusChanged(PlayerStatusModel playerStatusModel)
         {
-            _logger.Info($"Status changed for '{playerStatusModel.Name}', to '{playerStatusModel.Status}'");
+            
 
             if (playerStatusModel.Status == PlayerStatus.Playing)
             {
+                _logger.Info($"'{playerStatusModel.Name}' is now playing - '{playerStatusModel.PlayerProfileUrl}'");
                 _alertSoundPlayer.Play();
                 this.Activate(true);
             }

@@ -44,10 +44,10 @@ namespace RobloxPlayerNotifierApp.Services
 
                     if(_previousPlayerStatuses.TryGetValue(playerName, out previousPlayerStatus))
                     {
-                        if(previousPlayerStatus.Status != PlayerStatus.Playing && currentPlayerStatus.Status == PlayerStatus.Playing)
+                        if(previousPlayerStatus.Status != currentPlayerStatus.Status)
                             OnPlayerStatusChanged(currentPlayerStatus);
                     }
-                    else if (currentPlayerStatus.Status == PlayerStatus.Playing)
+                    else
                     {
                         OnPlayerStatusChanged(currentPlayerStatus);
                     }
