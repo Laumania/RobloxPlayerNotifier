@@ -8,6 +8,22 @@ To be honest as a developer, I actually wanted to create this small tool myself,
 
 **NOTE: This is a Windows only application**
 
+## Add your favorite Roblox players
+To replace the default Roblox players in the app you need to open the file 'RobloxPlayerNotifierApp.exe.config'.
+
+In there you will find this line:
+```xml
+<add key="PlayerNamesToMonitor" value="ComKeanOfficial;Emil_trier;Mikkel_trier"/>
+```
+Replace the "ComKeanOfficial;Emil_trier;Mikkel_trier", with a semi-colon (;) seperated list of Roblox players you want to get notifications for.
+
+Example:
+```xml
+<add key="PlayerNamesToMonitor" value="Player01;Player02;Player03"/>
+```
+Then restart the application and be amazed!
+
+
 ## FAQ
 - Why didn't you just build this in JavaScript, then it would have worked on Mac and Linux too?
   - Because it's JavaScript! --> https://www.destroyallsoftware.com/talks/wat ... you want more? Ok, https://hackernoon.com/how-it-feels-to-learn-javascript-in-2016-d3a717dd577f
