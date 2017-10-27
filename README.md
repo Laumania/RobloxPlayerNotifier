@@ -9,7 +9,7 @@ To be honest as a developer, I actually wanted to create this small tool myself,
 **NOTE: This is a Windows only application**
 
 ## Add your favorite Roblox players
-To replace the default Roblox players in the app you need to open the file 'RobloxPlayerNotifierApp.exe.config'.
+To replace the default Roblox players in the app you need to open the file `RobloxPlayerNotifierApp.exe.config`.
 
 In there you will find this line:
 ```xml
