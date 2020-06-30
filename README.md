@@ -32,7 +32,7 @@ IMPORTANT: The application have to run (can be minimized) for it to work, it doe
 
 
 ### 4. Await players to play a game
-When one of the players you have added to your config file joins a game (try it with your own username to see it working) a notification will be shown in the lower left corner.
+When one of the players you have added to your config file joins a game (try it with your own username to see it working) a notification sound will be played and a green button next to the playername in the app will light up.
 
 ## FAQ
 - Why didn't you just build this in JavaScript, then it would have worked on Mac and Linux too?
