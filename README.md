@@ -8,7 +8,12 @@ To be honest as a developer, I actually wanted to create this small tool myself,
 
 **NOTE: This is a Windows only application**
 
-## Add your favorite Roblox players
+# Getting started
+
+## 1. Download and unzip
+[Download latest release](https://github.com/Laumania/RobloxPlayerNotifier/releases) and unzip it.
+
+## 2. Add your favorite Roblox players
 To replace the default Roblox players in the app you need to open the file `RobloxPlayerNotifierApp.exe.config`.
 
 In there you will find this line:
@@ -21,8 +26,13 @@ Example:
 ```xml
 <add key="PlayerNamesToMonitor" value="Player01;Player02;Player03"/>
 ```
-Then restart the application and be amazed!
+## 3. Run the applications
+Now start the application - "RobloxPlayerNotifierApp.exe" and you should see the application running.
+IMPORTANT: The application have to run (can be minimized) for it to work, it doesn't run in the background or in tray.
 
+
+## 4. Await players to play a game
+When one of the players you have added to your config file joins a game (try it with your own username to see it working) a notification will be shown in the lower left corner.
 
 ## FAQ
 - Why didn't you just build this in JavaScript, then it would have worked on Mac and Linux too?
