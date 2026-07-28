@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.ComponentModel;
+using System.IO;
 using System.Media;
-using System.Threading;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Forms;
+using System.Windows.Interop;
 using NLog;
 using RobloxPlayerNotifierApp.Models;
-using RobloxPlayerNotifierApp.Services;
 using RobloxPlayerNotifierApp.ViewModels;
+using Application = System.Windows.Application;
 
 namespace RobloxPlayerNotifierApp.Views
 {
@@ -16,20 +18,66 @@ namespace RobloxPlayerNotifierApp.Views
     /// </summary>
     public partial class MainView : Window
     {
-        private readonly Logger         _logger             = LogManager.GetCurrentClassLogger();
-        private readonly SoundPlayer    _alertSoundPlayer   = new SoundPlayer("Sounds\\EasyPeasyLemonSqueezy.wav");
-        private readonly MainViewModel  _viewModel;
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        private const int SW_SHOW = 5;
+        private const int SW_RESTORE = 9;
+
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private readonly SoundPlayer _alertSoundPlayer;
+        private readonly MainViewModel _viewModel;
+        private readonly NotifyIcon _notifyIcon;
+        private bool _isExiting;
 
         public MainView()
         {
             InitializeComponent();
 
+            var soundPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Sounds", "EasyPeasyLemonSqueezy.wav");
+            if (File.Exists(soundPath))
+            {
+                _alertSoundPlayer = new SoundPlayer(soundPath);
+            }
+            else
+            {
+                _alertSoundPlayer = new SoundPlayer("Sounds\\EasyPeasyLemonSqueezy.wav");
+            }
+
+            _notifyIcon = new NotifyIcon
+            {
+                Visible = true,
+                Text = "Roblox Player Notifier"
+            };
+
+            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RobloxNotifier.ico");
+            if (File.Exists(iconPath))
+            {
+                _notifyIcon.Icon = new System.Drawing.Icon(iconPath);
+            }
+            else
+            {
+                var processPath = Environment.ProcessPath ?? System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                _notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(processPath);
+            }
+
+            _notifyIcon.DoubleClick += (s, e) => ShowWindowFromTray();
+            _notifyIcon.BalloonTipClicked += (s, e) => ShowWindowFromTray();
+
+            var contextMenu = new ContextMenuStrip();
+            var showItem = new ToolStripMenuItem("Show App", null, (s, e) => ShowWindowFromTray());
+            var exitItem = new ToolStripMenuItem("Exit", null, (s, e) => ExitApplication());
+            contextMenu.Items.Add(showItem);
+            contextMenu.Items.Add(new ToolStripSeparator());
+            contextMenu.Items.Add(exitItem);
+            _notifyIcon.ContextMenuStrip = contextMenu;
+
             this.DataContext = _viewModel = new MainViewModel();
 
             _viewModel.PlayerStatusChanged += PlayerStatusChanged;
-
-            PreviouseWindowState = WindowState;
-            LayoutUpdated += Window_LayoutUpdated;
         }
 
         private void MainView_OnLoaded(object sender, RoutedEventArgs e)
@@ -39,33 +87,78 @@ namespace RobloxPlayerNotifierApp.Views
 
         private void PlayerStatusChanged(PlayerStatusModel playerStatusModel)
         {
-            
-
-            if (playerStatusModel.Status == PlayerStatus.Playing)
+            if (playerStatusModel.Status == PlayerStatus.Playing || playerStatusModel.Status == PlayerStatus.Online)
             {
-                _logger.Info($"'{playerStatusModel.Name}' is now playing - '{playerStatusModel.PlayerProfileUrl}'");
-                _alertSoundPlayer.Play();
-                this.Activate(true);
+                string actionText = playerStatusModel.Status == PlayerStatus.Playing ? "is playing now!" : "is online now!";
+                _logger.Info($"'{playerStatusModel.Name}' {actionText} - '{playerStatusModel.PlayerProfileUrl}'");
+
+                _notifyIcon.ShowBalloonTip(5000, "Roblox Player Notifier", $"{playerStatusModel.Name} {actionText}", ToolTipIcon.Info);
+
+                try
+                {
+                    _alertSoundPlayer.Play();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Failed to play notification sound");
+                }
             }
         }
 
-
-
-        private void Window_LayoutUpdated(object sender, EventArgs e)
+        protected override void OnStateChanged(EventArgs e)
         {
-            PreviouseWindowState = WindowState;
-        }
-
-        public bool Activate(bool restoreIfMinimized)
-        {
-            if (restoreIfMinimized && WindowState == WindowState.Minimized)
+            if (WindowState == WindowState.Minimized)
             {
-                WindowState = PreviouseWindowState == WindowState.Normal
-                    ? WindowState.Normal : WindowState.Maximized;
+                this.Hide();
+                this.ShowInTaskbar = false;
+                _notifyIcon.ShowBalloonTip(3000, "Roblox Player Notifier", "App is running in the background.", ToolTipIcon.Info);
             }
-            return Activate();
+            base.OnStateChanged(e);
         }
 
-        private WindowState PreviouseWindowState { get; set; }
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            if (!_isExiting)
+            {
+                e.Cancel = true;
+                this.Hide();
+                this.ShowInTaskbar = false;
+                _notifyIcon.ShowBalloonTip(3000, "Roblox Player Notifier", "App is running in the background.", ToolTipIcon.Info);
+            }
+            else
+            {
+                _notifyIcon.Dispose();
+            }
+            base.OnClosing(e);
+        }
+
+        public void ShowWindowFromTray()
+        {
+            if (!this.IsVisible)
+            {
+                this.Show();
+            }
+            this.ShowInTaskbar = true;
+            this.WindowState = WindowState.Normal;
+            this.Activate();
+            this.Topmost = true;
+            this.Topmost = false;
+            this.Focus();
+
+            var windowHandle = new WindowInteropHelper(this).Handle;
+            if (windowHandle != IntPtr.Zero)
+            {
+                ShowWindow(windowHandle, SW_SHOW);
+                ShowWindow(windowHandle, SW_RESTORE);
+                SetForegroundWindow(windowHandle);
+            }
+        }
+
+        private void ExitApplication()
+        {
+            _isExiting = true;
+            _notifyIcon.Dispose();
+            Application.Current.Shutdown();
+        }
     }
 }
