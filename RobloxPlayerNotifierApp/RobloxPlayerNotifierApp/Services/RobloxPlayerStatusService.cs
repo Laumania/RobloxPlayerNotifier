@@ -20,7 +20,10 @@ namespace RobloxPlayerNotifierApp.Services
 
         public RobloxPlayerStatusService()
         {
-            _httpClient = new HttpClient();
+            _httpClient = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(10)
+            };
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "RobloxPlayerNotifierApp/2.0");
         }
 
@@ -64,17 +67,20 @@ namespace RobloxPlayerNotifierApp.Services
             var requestUrl = "https://users.roblox.com/v1/usernames/users";
             var payload = new UsernameLookupRequest { Usernames = new[] { robloxPlayerName }, ExcludeBannedUsers = false };
             var json = JsonSerializer.Serialize(payload);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync(requestUrl, content);
-            if (response.IsSuccessStatusCode)
+            using (var content = new StringContent(json, Encoding.UTF8, "application/json"))
             {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<UsernameLookupResponse>(responseContent);
-                var user = result?.Data?.FirstOrDefault();
-                if (user != null)
+                using (var response = await _httpClient.PostAsync(requestUrl, content))
                 {
-                    return user.Id;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var result = JsonSerializer.Deserialize<UsernameLookupResponse>(responseContent);
+                        var user = result?.Data?.FirstOrDefault();
+                        if (user != null)
+                        {
+                            return user.Id;
+                        }
+                    }
                 }
             }
             return 0;
@@ -85,25 +91,28 @@ namespace RobloxPlayerNotifierApp.Services
             var requestUrl = "https://presence.roblox.com/v1/presence/users";
             var payload = new PresenceLookupRequest { UserIds = new[] { userId } };
             var json = JsonSerializer.Serialize(payload);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync(requestUrl, content);
-            if (response.IsSuccessStatusCode)
+            using (var content = new StringContent(json, Encoding.UTF8, "application/json"))
             {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<PresenceLookupResponse>(responseContent);
-                var presence = result?.UserPresences?.FirstOrDefault();
-                if (presence != null)
+                using (var response = await _httpClient.PostAsync(requestUrl, content))
                 {
-                    switch (presence.UserPresenceType)
+                    if (response.IsSuccessStatusCode)
                     {
-                        case 2:
-                            return PlayerStatus.Playing;
-                        case 1:
-                        case 3:
-                            return PlayerStatus.Online;
-                        default:
-                            return PlayerStatus.Offline;
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var result = JsonSerializer.Deserialize<PresenceLookupResponse>(responseContent);
+                        var presence = result?.UserPresences?.FirstOrDefault();
+                        if (presence != null)
+                        {
+                            switch (presence.UserPresenceType)
+                            {
+                                case 2:
+                                    return PlayerStatus.Playing;
+                                case 1:
+                                case 3:
+                                    return PlayerStatus.Online;
+                                default:
+                                    return PlayerStatus.Offline;
+                            }
+                        }
                     }
                 }
             }

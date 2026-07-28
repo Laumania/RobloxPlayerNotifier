@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using NLog;
 using RobloxPlayerNotifierApp.Models;
 using RobloxPlayerNotifierApp.Services;
 
@@ -16,6 +17,8 @@ namespace RobloxPlayerNotifierApp.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
         public event PropertyChangedEventHandler PropertyChanged;
         public Action<PlayerStatusModel> PlayerStatusChanged;
 
@@ -45,7 +48,10 @@ namespace RobloxPlayerNotifierApp.ViewModels
                             UseShellExecute = true
                         });
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, $"Failed to launch player profile URL: '{playerStatus.PlayerProfileUrl}'");
+                    }
                 }
             });
 
@@ -84,7 +90,7 @@ namespace RobloxPlayerNotifierApp.ViewModels
         private void LoadSettingsAndPlayers()
         {
             var intervalStr = ConfigurationManager.AppSettings["PlayerStatusCheckIntervalInSeconds"];
-            if (int.TryParse(intervalStr, out int interval) && interval >= 5)
+            if (int.TryParse(intervalStr, out int interval) && interval >= 5 && interval <= 3600)
             {
                 _checkIntervalSeconds = interval;
             }
@@ -164,7 +170,10 @@ namespace RobloxPlayerNotifierApp.ViewModels
                 config.Save(ConfigurationSaveMode.Modified);
                 ConfigurationManager.RefreshSection("appSettings");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Failed to save configuration settings to App.config");
+            }
         }
 
         private void MonitorServicePlayerStatusChanged(PlayerStatusModel playerStatusModel)

@@ -47,33 +47,40 @@ namespace RobloxPlayerNotifierApp.Views
                 _alertSoundPlayer = new SoundPlayer("Sounds\\EasyPeasyLemonSqueezy.wav");
             }
 
-            _notifyIcon = new NotifyIcon
+            try
             {
-                Visible = true,
-                Text = "Roblox Player Notifier"
-            };
+                _notifyIcon = new NotifyIcon
+                {
+                    Visible = true,
+                    Text = "Roblox Player Notifier"
+                };
 
-            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RobloxNotifier.ico");
-            if (File.Exists(iconPath))
-            {
-                _notifyIcon.Icon = new System.Drawing.Icon(iconPath);
+                var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RobloxNotifier.ico");
+                if (File.Exists(iconPath))
+                {
+                    _notifyIcon.Icon = new System.Drawing.Icon(iconPath);
+                }
+                else
+                {
+                    var processPath = Environment.ProcessPath ?? System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                    _notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(processPath) ?? System.Drawing.SystemIcons.Application;
+                }
+
+                _notifyIcon.DoubleClick += (s, e) => ShowWindowFromTray();
+                _notifyIcon.BalloonTipClicked += (s, e) => ShowWindowFromTray();
+
+                var contextMenu = new ContextMenuStrip();
+                var showItem = new ToolStripMenuItem("Show App", null, (s, e) => ShowWindowFromTray());
+                var exitItem = new ToolStripMenuItem("Exit", null, (s, e) => ExitApplication());
+                contextMenu.Items.Add(showItem);
+                contextMenu.Items.Add(new ToolStripSeparator());
+                contextMenu.Items.Add(exitItem);
+                _notifyIcon.ContextMenuStrip = contextMenu;
             }
-            else
+            catch (Exception ex)
             {
-                var processPath = Environment.ProcessPath ?? System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
-                _notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(processPath);
+                _logger.Error(ex, "Failed to initialize System Tray NotifyIcon");
             }
-
-            _notifyIcon.DoubleClick += (s, e) => ShowWindowFromTray();
-            _notifyIcon.BalloonTipClicked += (s, e) => ShowWindowFromTray();
-
-            var contextMenu = new ContextMenuStrip();
-            var showItem = new ToolStripMenuItem("Show App", null, (s, e) => ShowWindowFromTray());
-            var exitItem = new ToolStripMenuItem("Exit", null, (s, e) => ExitApplication());
-            contextMenu.Items.Add(showItem);
-            contextMenu.Items.Add(new ToolStripSeparator());
-            contextMenu.Items.Add(exitItem);
-            _notifyIcon.ContextMenuStrip = contextMenu;
 
             this.DataContext = _viewModel = new MainViewModel();
 
@@ -92,7 +99,11 @@ namespace RobloxPlayerNotifierApp.Views
                 string actionText = playerStatusModel.Status == PlayerStatus.Playing ? "is playing now!" : "is online now!";
                 _logger.Info($"'{playerStatusModel.Name}' {actionText} - '{playerStatusModel.PlayerProfileUrl}'");
 
-                _notifyIcon.ShowBalloonTip(5000, "Roblox Player Notifier", $"{playerStatusModel.Name} {actionText}", ToolTipIcon.Info);
+                try
+                {
+                    _notifyIcon?.ShowBalloonTip(5000, "Roblox Player Notifier", $"{playerStatusModel.Name} {actionText}", ToolTipIcon.Info);
+                }
+                catch { }
 
                 try
                 {
@@ -111,7 +122,11 @@ namespace RobloxPlayerNotifierApp.Views
             {
                 this.Hide();
                 this.ShowInTaskbar = false;
-                _notifyIcon.ShowBalloonTip(3000, "Roblox Player Notifier", "App is running in the background.", ToolTipIcon.Info);
+                try
+                {
+                    _notifyIcon?.ShowBalloonTip(3000, "Roblox Player Notifier", "App is running in the background.", ToolTipIcon.Info);
+                }
+                catch { }
             }
             base.OnStateChanged(e);
         }
@@ -123,11 +138,15 @@ namespace RobloxPlayerNotifierApp.Views
                 e.Cancel = true;
                 this.Hide();
                 this.ShowInTaskbar = false;
-                _notifyIcon.ShowBalloonTip(3000, "Roblox Player Notifier", "App is running in the background.", ToolTipIcon.Info);
+                try
+                {
+                    _notifyIcon?.ShowBalloonTip(3000, "Roblox Player Notifier", "App is running in the background.", ToolTipIcon.Info);
+                }
+                catch { }
             }
             else
             {
-                _notifyIcon.Dispose();
+                _notifyIcon?.Dispose();
             }
             base.OnClosing(e);
         }
@@ -157,7 +176,7 @@ namespace RobloxPlayerNotifierApp.Views
         private void ExitApplication()
         {
             _isExiting = true;
-            _notifyIcon.Dispose();
+            _notifyIcon?.Dispose();
             Application.Current.Shutdown();
         }
     }

@@ -17,6 +17,7 @@ namespace RobloxPlayerNotifierApp.Services
         private readonly RobloxPlayerStatusService _statusService = new RobloxPlayerStatusService();
         private readonly ConcurrentDictionary<string, PlayerStatusModel> _previousPlayerStatuses = new ConcurrentDictionary<string, PlayerStatusModel>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, bool> _monitoredPlayers = new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        private readonly SemaphoreSlim _checkSemaphore = new SemaphoreSlim(1, 1);
         private CancellationTokenSource _cts;
 
         public RobloxPlayerMonitorService()
@@ -24,7 +25,7 @@ namespace RobloxPlayerNotifierApp.Services
             var intervalAsString = ConfigurationManager.AppSettings["PlayerStatusCheckIntervalInSeconds"] ?? "15";
             if (double.TryParse(intervalAsString, out double intervalAsDouble))
             {
-                _statusCheckInterval = TimeSpan.FromSeconds(Math.Max(5, intervalAsDouble));
+                _statusCheckInterval = TimeSpan.FromSeconds(Math.Clamp(intervalAsDouble, 5, 3600));
             }
             else
             {
@@ -34,7 +35,7 @@ namespace RobloxPlayerNotifierApp.Services
 
         public void SetCheckInterval(int seconds)
         {
-            if (seconds >= 5)
+            if (seconds >= 5 && seconds <= 3600)
             {
                 _statusCheckInterval = TimeSpan.FromSeconds(seconds);
             }
@@ -83,9 +84,19 @@ namespace RobloxPlayerNotifierApp.Services
         {
             Task.Run(async () =>
             {
-                foreach (var playerName in _monitoredPlayers.Keys.ToList())
+                if (await _checkSemaphore.WaitAsync(0))
                 {
-                    await CheckSinglePlayerAsync(playerName);
+                    try
+                    {
+                        foreach (var playerName in _monitoredPlayers.Keys.ToList())
+                        {
+                            await CheckSinglePlayerAsync(playerName);
+                        }
+                    }
+                    finally
+                    {
+                        _checkSemaphore.Release();
+                    }
                 }
             });
         }
@@ -100,15 +111,25 @@ namespace RobloxPlayerNotifierApp.Services
         {
             while (IsRunning && !token.IsCancellationRequested)
             {
-                var currentPlayers = _monitoredPlayers.Keys.ToList();
-                foreach (var playerName in currentPlayers)
-                {
-                    if (token.IsCancellationRequested) break;
-                    await CheckSinglePlayerAsync(playerName);
-                }
-
                 try
                 {
+                    if (await _checkSemaphore.WaitAsync(0, token))
+                    {
+                        try
+                        {
+                            var currentPlayers = _monitoredPlayers.Keys.ToList();
+                            foreach (var playerName in currentPlayers)
+                            {
+                                if (token.IsCancellationRequested) break;
+                                await CheckSinglePlayerAsync(playerName);
+                            }
+                        }
+                        finally
+                        {
+                            _checkSemaphore.Release();
+                        }
+                    }
+
                     await Task.Delay(_statusCheckInterval, token);
                 }
                 catch (TaskCanceledException)

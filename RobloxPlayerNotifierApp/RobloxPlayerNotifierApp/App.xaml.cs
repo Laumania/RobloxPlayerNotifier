@@ -2,12 +2,14 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using NLog;
 using RobloxPlayerNotifierApp.Views;
 
 namespace RobloxPlayerNotifierApp
 {
     public partial class App : Application
     {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private static Mutex _mutex = null;
         private static EventWaitHandle _wakeupEvent = null;
 
@@ -27,7 +29,10 @@ namespace RobloxPlayerNotifierApp
                         wakeupEvent.Set();
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Failed to signal wakeup event to primary instance");
+                }
 
                 Shutdown();
                 return;
@@ -52,7 +57,11 @@ namespace RobloxPlayerNotifierApp
                             });
                         }
                     }
-                    catch { break; }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Error in single-instance wakeup listener thread");
+                        break;
+                    }
                 }
             });
 
