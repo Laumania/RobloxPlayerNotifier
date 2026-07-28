@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -26,15 +26,10 @@ namespace RobloxPlayerNotifierApp.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-
-
-
-
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
 
         public string Name
         {
@@ -53,7 +48,7 @@ namespace RobloxPlayerNotifierApp.ViewModels
             {
                 _status = value;
                 OnPropertyChanged();
-                OnPropertyChanged("ProfileButtonVisibility");
+                OnPropertyChanged(nameof(ProfileButtonVisibility));
             }
         }
 
@@ -64,7 +59,7 @@ namespace RobloxPlayerNotifierApp.ViewModels
             {
                 _playerProfileUrl = value;
                 OnPropertyChanged();
-                OnPropertyChanged("ProfileButtonVisibility");
+                OnPropertyChanged(nameof(ProfileButtonVisibility));
             }
         }
 
@@ -72,7 +67,7 @@ namespace RobloxPlayerNotifierApp.ViewModels
         {
             get
             {
-                return String.IsNullOrEmpty(_playerProfileUrl) == false && _status == PlayerStatus.Playing
+                return !string.IsNullOrEmpty(_playerProfileUrl) && (_status == PlayerStatus.Playing || _status == PlayerStatus.Online)
                     ? Visibility.Visible
                     : Visibility.Collapsed;
             }

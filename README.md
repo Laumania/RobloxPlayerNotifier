@@ -1,44 +1,54 @@
-# RobloxPlayerNotifier
-Want to get a notification when your favorite Roblox player (read: Youtuber) is playing?
+# RobloxPlayerNotifier 🚀
 
-My kids want to know that too, as they can then try to join their favorite players and maybe meet them in Roblox - yes thats a big thing for kids these days.
+A modern Windows application to track your favorite Roblox players and receive instant notifications (audio & Windows toast notifications) when they come **Online** or start **Playing** a game!
 
-My 2 min. Google research told me that Roblox don't have that feature already and nobody had created a similar service that did it. 
-To be honest as a developer, I actually wanted to create this small tool myself, just for the fun of it :)
+> **NOTE: Windows Only Application (.NET 8.0 WPF)**
 
-**NOTE: This is a Windows only application**
+---
 
-## Getting started
+## Key Features & Improvements
 
-### 1. Download and unzip
-[Download latest release](https://github.com/Laumania/RobloxPlayerNotifier/releases) and unzip it.
+- **Official Roblox APIs**: Upgraded from legacy web scraping to official Roblox APIs for real-time presence checks.
+- **Modern .NET 8.0 WPF UI**: Sleek, modern interface built with .NET 8.
+- **Full UI Management**: Easily **Add** or **Delete** players directly inside the application UI, and customize the status check interval without editing config files manually.
+- **System Tray & Background Mode**: Minimizing or closing the window minimizes it cleanly to the Windows System Tray (notification area).
+- **Windows Toast Notifications**: Displays native Windows notification banners whenever a player goes online or joins a game.
+- **Audio Alerts**: Plays a sound notification when monitored players change status to Online/Playing.
+- **Single Instance Protection**: Re-launching the executable automatically brings the running background window back to the front.
+- **One-Click Profile Access**: Quick "Join" button to launch the player's Roblox profile in your default browser.
 
-### 2. Add your favorite Roblox players
-To replace the default Roblox players in the app you need to open the file `RobloxPlayerNotifierApp.exe.config`.
+---
 
-In there you will find this line:
-```xml
-<add key="PlayerNamesToMonitor" value="ComKeanOfficial;Emil_trier;Mikkel_trier"/>
+## Getting Started
+
+### 1. Download & Run
+1. Download the latest build from the [Releases](https://github.com/Laumania/RobloxPlayerNotifier/releases) page.
+2. Run `RobloxPlayerNotifierApp.exe`.
+
+### 2. Manage Players & Settings in UI
+- **Add Player**: Type any Roblox username into the top input box and click **+ Add Player**.
+- **Delete Player**: Click the **Delete** button next to any player in the list.
+- **Adjust Interval**: Modify the **Interval (s)** input box to change how often the app checks player statuses (e.g. 15s).
+- **Refresh**: Click **Refresh** to trigger an immediate status check.
+
+---
+
+## Building from Source
+
+### Requirements
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or later.
+
+### Build Commands
+```powershell
+# Clone the repository
+git clone https://github.com/Laumania/RobloxPlayerNotifier.git
+cd RobloxPlayerNotifier
+
+# Build and publish
+dotnet publish RobloxPlayerNotifierApp/RobloxPlayerNotifierApp/RobloxPlayerNotifierApp.csproj -c Release
 ```
-Replace the "ComKeanOfficial;Emil_trier;Mikkel_trier", with a semi-colon (;) seperated list of Roblox players you want to get notifications for.
 
-Example:
-```xml
-<add key="PlayerNamesToMonitor" value="Player01;Player02;Player03"/>
-```
-### 3. Run the applications
-Now start the application - "RobloxPlayerNotifierApp.exe" and you should see the application running.
-IMPORTANT: The application have to run (can be minimized) for it to work, it doesn't run in the background or in tray.
+---
 
-
-### 4. Await players to play a game
-When one of the players you have added to your config file joins a game (try it with your own username to see it working) a notification sound will be played and a green button next to the playername in the app will light up.
-
-## FAQ
-- Why didn't you just build this in JavaScript, then it would have worked on Mac and Linux too?
-  - Because it's JavaScript! --> https://www.destroyallsoftware.com/talks/wat ... you want more? Ok, https://hackernoon.com/how-it-feels-to-learn-javascript-in-2016-d3a717dd577f
-
-
-## History
-This project was originally created as a quick and dirty solution for my kids to get notified when there favorite youtubers came online in Roblox. Yes, I know, a tool you cannot live without :P
-Don't take it too serious as it was created in a few hours. However, it solved the "problem" my kids had :)
+## License
+Licensed under the [MIT License](LICENSE).
